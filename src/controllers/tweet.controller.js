@@ -25,7 +25,7 @@ let getUserTweets = asyncHandler(async(req, res)=>{
     const {userId} = req.params;
 
     if(!isValidObjectId(userId)){
-        throw new ApiError(400, "Invaild user id!");
+        throw new ApiError(404, "Invaild user id!");
     }
 
     let tweets = await Tweet.aggregate([
@@ -34,7 +34,10 @@ let getUserTweets = asyncHandler(async(req, res)=>{
       ],
     )
 
-    console.log(tweets)
+    if(!tweets){
+      throw new ApiError(404, "No user Tweets found!!")
+    }
+    
 
     return res.status(200)
     .json(new ApiResponse(200, tweets, "fetched all tweets created by user succesfully!! "))
