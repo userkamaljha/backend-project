@@ -21,7 +21,6 @@ let generateAccessTokenAndRefreshToken = async(userId)=>{
     }
 }
 
-
 let registerUser  = asyncHandler(async (req , res)=>{
 
     // get user details from frontend
@@ -147,8 +146,8 @@ let loginUser = asyncHandler(async(req, res)=>{
 const logoutUser = asyncHandler(async(req, res)=>{
  await  User.findByIdAndUpdate(
     req.user._id,{
-        $set:{
-            refreshToken:undefined
+        $unset:{
+            refreshToken:1
         }
     },
     {new: true}
