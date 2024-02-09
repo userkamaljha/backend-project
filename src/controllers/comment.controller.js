@@ -1,4 +1,4 @@
-import { connect, isValidObjectId } from "mongoose";
+import { mongoose, isValidObjectId } from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -61,7 +61,7 @@ const updateComment = asyncHandler(async(req, res)=>{
     }
 
     if(!content || content === "" ){
-        throw new ApiError(400, "Please provide comment content!!")
+        throw new ApiError(404, "Please provide comment content!!")
     }
 
     const comment = await Comment.findByIdAndUpdate(commentId, {
@@ -77,4 +77,26 @@ const updateComment = asyncHandler(async(req, res)=>{
 
 })
 
-export {addComment, removeComment, updateComment}
+const getVideoComment = asyncHandler(async(req, res)=>{
+    let {videoId} = req.params
+    const {page= 1, limit= 10} = req.query
+
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invaild video id!!")
+    }
+ 
+    let comments = await Comment.aggregatePaginate([
+        {$match: { video :new mongoose.Types.ObjectId(videoId) }},
+        {$sort: { createdAt: -1 }},
+        {$skip:(page -1 )* limit},
+        {$limit: limit},
+    ],{ page, limit })
+
+    return res.status(200).json(
+        new ApiResponse(200, comments, "fetched video comments successfully!! ")
+    )
+
+
+})
+
+export {addComment, removeComment, updateComment, getVideoComment}
